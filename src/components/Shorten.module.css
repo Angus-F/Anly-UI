@@ -1,0 +1,13 @@
+.actions {
+  text-align: left;
+}
+.main {
+  width: 90%;
+  max-width: 60rem;
+  margin: 2rem auto;
+  padding: 2rem;
+}
+
+.error-text {
+    color: #b40e0e;
+  }
