@@ -2,14 +2,23 @@ import Button from "./UI/Button/Button";
 import Card from "./UI/Card/Card";
 import Input from "./UI/Input/Input";
 import classes from "./Shorten.module.css";
-import { useState } from "react";
-import useHttp from "../hooks/use-http";
+import { useEffect, useRef, useState } from "react";
+import axios from "axios";
 
+const anlyServiceUrl = "http://localhost:8080/anly";
 const Shorten = () => {
-  const [enteredUrl, setEnteredUrl] = useState("");
   const [enteredUrlIsValid, setEnteredUrlIsValid] = useState(true);
-  const { isLoading, error, sendRequest, responseData } = useHttp();
+  const [responseData, setResponseData] = useState(null);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const inputRef = useRef();
 
+  useEffect(() => {
+    console.log(responseData);
+    if (responseData) {
+      inputRef.current.value = responseData.shortUrl;
+    }
+  }, [responseData]);
   const isEmpty = (url) => {
     if (url.trim() === "") {
       return true;
@@ -20,7 +29,7 @@ const Shorten = () => {
   const isAnlyUrl = (url) => {
     if (
       url.includes("http://localhost:8080/anly") ||
-      url.includes("https://localhost:8080/anly/")
+      url.includes("https://localhost:8080/anly")
     ) {
       return true;
     }
@@ -36,6 +45,7 @@ const Shorten = () => {
 
   const submitHandler = (event) => {
     event.preventDefault();
+    const enteredUrl = inputRef.current.value;
     if (isEmpty(enteredUrl)) {
       setEnteredUrlIsValid(false);
       return;
@@ -47,39 +57,34 @@ const Shorten = () => {
     }
     setEnteredUrlIsValid(true);
 
-    sendRequest(
-      {
-        url: "http://localhost:8080/anly",
-        mode: "no-cors",
-        method: "POST",
-        body: { longUrl: formattedUrl },
-        headers: {
-          "Content-Type": "text/plain",
-        },
+    setError(null);
+    setIsLoading(true);
+    axios({
+      method: "POST",
+      url: anlyServiceUrl,
+      data: {
+        longUrl: formattedUrl,
+        shotUrl: "",
       },
-      (data) => {
-        for (const key in data) {
-          return data[key];
-        }
-      }
-    );
-    if (!error) {
-      setEnteredUrl(responseData);
-    }
+    })
+      .then((response) => {
+        setResponseData(response.data);
+      })
+      .catch((err) => {
+        setError(err.message);
+        console.log(err.message);
+      });
+    setIsLoading(false);
   };
 
-  const urlChangeHandler = (event) => {
-    setEnteredUrl(event.target.value);
-  };
   return (
     <Card className={classes.main}>
       <form onSubmit={submitHandler}>
         <Input
-          value={enteredUrl}
+          ref={inputRef}
           type="text"
           id="longUrl"
           label="Shorten your link here:"
-          onChange={urlChangeHandler}
         />
         {!enteredUrlIsValid && (
           <p className={classes["error-text"]}>Please provide a valid url!</p>
