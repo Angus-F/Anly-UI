@@ -5,7 +5,7 @@ import classes from "./Shorten.module.css";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 
-const anlyServiceUrl = "http://localhost:8080/anly";
+const anlyServiceUrl = "http://localhost:8080/longToShort";
 const Shorten = () => {
   const [enteredUrlIsValid, setEnteredUrlIsValid] = useState(true);
   const [responseData, setResponseData] = useState(null);
@@ -28,8 +28,8 @@ const Shorten = () => {
 
   const isAnlyUrl = (url) => {
     if (
-      url.includes("http://localhost:8080/anly") ||
-      url.includes("https://localhost:8080/anly")
+      url.includes("http://localhost:8080") ||
+      url.includes("https://localhost:8080")
     ) {
       return true;
     }
@@ -65,6 +65,7 @@ const Shorten = () => {
       data: {
         longUrl: formattedUrl,
         shotUrl: "",
+        encode: "random1",
       },
     })
       .then((response) => {
