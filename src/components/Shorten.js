@@ -4,13 +4,17 @@ import Input from "./UI/Input/Input";
 import classes from "./Shorten.module.css";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
+import Table from "./Table";
 
-const anlyServiceUrl = "http://localhost:8080/longToShort";
+const anlyLongToShortUrl = "http://localhost:8080/longToShort";
+const anlyDataUrl = "http://localhost:8080/getData";
+const encodeMethod = "random2";
 const Shorten = () => {
   const [enteredUrlIsValid, setEnteredUrlIsValid] = useState(true);
   const [responseData, setResponseData] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [urls, setUrls] = useState([]);
   const inputRef = useRef();
 
   useEffect(() => {
@@ -18,7 +22,15 @@ const Shorten = () => {
     if (responseData) {
       inputRef.current.value = responseData.shortUrl;
     }
+    axios({
+      method: "GET",
+      url: anlyDataUrl,
+      params: {encode: encodeMethod}
+    }).then((response) => {
+      setUrls(response.data);
+    });
   }, [responseData]);
+
   const isEmpty = (url) => {
     if (url.trim() === "") {
       return true;
@@ -61,11 +73,11 @@ const Shorten = () => {
     setIsLoading(true);
     axios({
       method: "POST",
-      url: anlyServiceUrl,
+      url: anlyLongToShortUrl,
       data: {
         longUrl: formattedUrl,
         shotUrl: "",
-        encode: "random1",
+        encode: encodeMethod,
       },
     })
       .then((response) => {
@@ -77,6 +89,10 @@ const Shorten = () => {
       });
     setIsLoading(false);
   };
+
+  const availableUrls = urls.map((url) => (
+    <Table key={url.id} shortUrl={url.shortUrl} longUrl={url.longUrl} />
+  ));
 
   return (
     <Card className={classes.main}>
@@ -96,6 +112,7 @@ const Shorten = () => {
           <Button type="submit">Shorten</Button>
         </div>
       </form>
+      <ul>{availableUrls}</ul>
     </Card>
   );
 };
