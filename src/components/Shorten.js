@@ -4,7 +4,7 @@ import Input from "./UI/Input/Input";
 import classes from "./Shorten.module.css";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import Table from "./Table";
+import UrlTable from "./UrlTable";
 
 const anlyLongToShortUrl = "http://localhost:8080/longToShort";
 const anlyDataUrl = "http://localhost:8080/getData";
@@ -25,7 +25,7 @@ const Shorten = () => {
     axios({
       method: "GET",
       url: anlyDataUrl,
-      params: {encode: encodeMethod}
+      params: { encode: encodeMethod },
     }).then((response) => {
       setUrls(response.data);
     });
@@ -90,8 +90,17 @@ const Shorten = () => {
     setIsLoading(false);
   };
 
+  const removeUrl = (shortUrl) => {
+    setUrls(urls.filter((url) => url.shortUrl !== shortUrl));
+  };
+
   const availableUrls = urls.map((url) => (
-    <Table key={url.id} shortUrl={url.shortUrl} longUrl={url.longUrl} />
+    <UrlTable
+      removeUrl={removeUrl}
+      key={url.id}
+      shortUrl={url.shortUrl}
+      longUrl={url.longUrl}
+    />
   ));
 
   return (
