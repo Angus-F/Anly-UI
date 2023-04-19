@@ -1,6 +1,6 @@
-import Button from "./UI/Button/Button";
-import Card from "./UI/Card/Card";
-import Input from "./UI/Input/Input";
+import Button from "../UI/Button/Button";
+import Card from "../UI/Card/Card";
+import Input from "../UI/Input/Input";
 import classes from "./Shorten.module.css";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";

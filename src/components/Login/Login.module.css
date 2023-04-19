@@ -1,0 +1,19 @@
+.login {
+    width: 90%;
+    max-width: 40rem;
+    margin: 2rem auto;
+    padding: 2rem;
+  }
+  
+  .actions {
+    text-align: center;
+  }
+  .error-text {
+    color: #b40e0e;
+  }
+  
+  .title {
+    width: 90%;
+    font-size: 2rem;
+    margin: 2rem auto;
+  }

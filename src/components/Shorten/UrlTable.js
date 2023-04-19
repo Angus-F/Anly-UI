@@ -1,4 +1,4 @@
-import Button from "./UI/Button/Button";
+import Button from "../UI/Button/Button";
 import classes from "./UrlTable.module.css";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { useState } from "react";
