@@ -66,6 +66,8 @@ const SignUp = () => {
             Please provide a valid password! Password should be longer than 5
           </p>
         )}
+        {ctx.error && <p className={classes["error-text"]}>{ctx.error}</p>}
+        {ctx.responseData && <p className={classes["success-text"]}>{ctx.responseData}</p>}
         <div className={classes.actions}>
           <Button type="submit" className={classes.btn}>
             Sign up

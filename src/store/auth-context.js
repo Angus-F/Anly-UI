@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
+import axios from "axios";
 
 const AuthContext = React.createContext({
   isLoggedIn: false,
@@ -10,11 +11,16 @@ const AuthContext = React.createContext({
   onClose: () => {},
   onShowSignUpPage: () => {},
   onShowLoginPage: () => {},
+  responseData: null,
+  error: null,
 });
 
 export const AuthContextProvider = (props) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [pageToShow, setPageToShow] = useState({ login: false, signUp: false });
+  const anlyRegisterUrl = "http://localhost:8080/register";
+  const [responseData, setResponseData] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const storedUserLoggedInInformation = localStorage.getItem("isLoggedIn");
@@ -36,7 +42,26 @@ export const AuthContextProvider = (props) => {
     setPageToShow({ login: false, signUp: false });
   };
 
-  const signUpHandler = (username, password) => {};
+  const signUpHandler = (username, password) => {
+    axios({
+      method: "POST",
+      url: anlyRegisterUrl,
+      data: {
+        password: password,
+        username: username,
+      },
+    })
+      .then((response) => {
+        setResponseData(response.data);
+        setError(null);
+        console.log(response.data);
+      })
+      .catch((err) => {
+        setError(err.response.data);
+        setResponseData(null);
+        console.log(err);
+      });
+  };
 
   const showLoginPageHandler = () => {
     setPageToShow({ login: true, signUp: false });
@@ -61,6 +86,8 @@ export const AuthContextProvider = (props) => {
         onClose: closeHandler,
         onShowLoginPage: showLoginPageHandler,
         onShowSignUpPage: showSignUpPageHandler,
+        responseData: responseData,
+        error: error,
       }}
     >
       {props.children}
