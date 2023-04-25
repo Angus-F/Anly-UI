@@ -18,9 +18,12 @@ const AuthContext = React.createContext({
 export const AuthContextProvider = (props) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [pageToShow, setPageToShow] = useState({ login: false, signUp: false });
-  const anlyRegisterUrl = "http://localhost:8080/register";
+
   const [responseData, setResponseData] = useState(null);
   const [error, setError] = useState(null);
+
+  const anlyRegisterUrl = "http://localhost:8080/register";
+  const anlyLoginUrl = "http://localhost:8080/login";
 
   useEffect(() => {
     const storedUserLoggedInInformation = localStorage.getItem("isLoggedIn");
@@ -30,10 +33,24 @@ export const AuthContextProvider = (props) => {
   }, []);
 
   const loginHandler = (username, password) => {
-    //To do
-    localStorage.setItem("isLoggedIn", "1");
-    setIsLoggedIn(true);
-    setPageToShow({ login: false, signUp: false });
+    axios({
+      method: "POST",
+      url: anlyLoginUrl,
+      data: {
+        password: password,
+        username: username,
+      },
+    })
+      .then((response) => {
+        setResponseData(response.data);
+        setError(null);
+        console.log(response.data);
+      })
+      .catch((err) => {
+        setError(err.response.data);
+        setResponseData(null);
+        console.log(err);
+      });
   };
 
   const logoutHandler = () => {
