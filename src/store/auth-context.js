@@ -86,10 +86,14 @@ export const AuthContextProvider = (props) => {
   };
 
   const showLoginPageHandler = () => {
+    setResponseData(null);
+    setError(null);
     setPageToShow({ login: true, signUp: false });
   };
 
   const showSignUpPageHandler = () => {
+    setResponseData(null);
+    setError(null);
     setPageToShow({ login: false, signUp: true });
   };
 
