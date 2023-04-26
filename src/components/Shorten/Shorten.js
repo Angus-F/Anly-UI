@@ -42,9 +42,9 @@ const Shorten = () => {
 
   useEffect(() => {
     console.log(responseData);
+    let urls = null;
     if (responseData) {
       inputRef.current.value = responseData.shortUrl;
-      let urls = null;
       if (localStorage.getItem("urlTable") === null) {
         urls = [responseData];
       } else {
@@ -53,8 +53,10 @@ const Shorten = () => {
         urls = [responseData, ...urls];
       }
       localStorage.setItem("urlTable", JSON.stringify(urls));
-      setAvailableUrls(urls);
+    } else {
+      urls = JSON.parse(localStorage.getItem("urlTable"));
     }
+    setAvailableUrls(urls);
   }, [responseData]);
 
   const submitHandler = (event) => {
@@ -80,6 +82,9 @@ const Shorten = () => {
       nextId = parseInt(localStorage.getItem("urlId")) + 1;
       localStorage.setItem("urlId", nextId.toString());
     }
+
+    const token = JSON.parse(localStorage.getItem("user")).token;
+
     axios({
       method: "POST",
       url: anlyLongToShortUrl,
@@ -89,6 +94,10 @@ const Shorten = () => {
         shotUrl: "",
         encode: encodeMethod,
       },
+      headers: {
+        Authorization: token,
+      },
+      withCredentials: true,
     })
       .then((response) => {
         setResponseData(response.data);

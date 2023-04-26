@@ -45,6 +45,10 @@ export const AuthContextProvider = (props) => {
         setResponseData(response.data);
         setError(null);
         console.log(response.data);
+        localStorage.setItem("user", JSON.stringify(response.data));
+        setIsLoggedIn(true);
+        setPageToShow({ login: false, signUp: false });
+        localStorage.setItem("isLoggedIn", "1");
       })
       .catch((err) => {
         setError(err.response.data);
@@ -55,6 +59,7 @@ export const AuthContextProvider = (props) => {
 
   const logoutHandler = () => {
     localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("user");
     setIsLoggedIn(false);
     setPageToShow({ login: false, signUp: false });
   };
