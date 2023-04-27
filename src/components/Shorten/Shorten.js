@@ -1,35 +1,20 @@
-import Button from "./UI/Button/Button";
-import Card from "./UI/Card/Card";
-import Input from "./UI/Input/Input";
+import Button from "../UI/Button/Button";
+import Card from "../UI/Card/Card";
+import Input from "../UI/Input/Input";
 import classes from "./Shorten.module.css";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import Table from "./Table";
+import UrlTable from "./UrlTable";
 
 const anlyLongToShortUrl = "http://localhost:8080/longToShort";
-const anlyDataUrl = "http://localhost:8080/getData";
 const encodeMethod = "random2";
 const Shorten = () => {
   const [enteredUrlIsValid, setEnteredUrlIsValid] = useState(true);
   const [responseData, setResponseData] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [urls, setUrls] = useState([]);
+  const [availableUrls, setAvailableUrls] = useState([]);
   const inputRef = useRef();
-
-  useEffect(() => {
-    console.log(responseData);
-    if (responseData) {
-      inputRef.current.value = responseData.shortUrl;
-    }
-    axios({
-      method: "GET",
-      url: anlyDataUrl,
-      params: {encode: encodeMethod}
-    }).then((response) => {
-      setUrls(response.data);
-    });
-  }, [responseData]);
 
   const isEmpty = (url) => {
     if (url.trim() === "") {
@@ -55,6 +40,25 @@ const Shorten = () => {
     return "http://" + url;
   };
 
+  useEffect(() => {
+    console.log(responseData);
+    let urls = null;
+    if (responseData) {
+      inputRef.current.value = responseData.shortUrl;
+      if (localStorage.getItem("urlTable") === null) {
+        urls = [responseData];
+      } else {
+        urls = JSON.parse(localStorage.getItem("urlTable"));
+        urls = urls.filter((url) => url.longUrl !== responseData.longUrl);
+        urls = [responseData, ...urls];
+      }
+      localStorage.setItem("urlTable", JSON.stringify(urls));
+    } else {
+      urls = JSON.parse(localStorage.getItem("urlTable"));
+    }
+    setAvailableUrls(urls);
+  }, [responseData]);
+
   const submitHandler = (event) => {
     event.preventDefault();
     const enteredUrl = inputRef.current.value;
@@ -71,14 +75,29 @@ const Shorten = () => {
 
     setError(null);
     setIsLoading(true);
+    let nextId = 0;
+    if (localStorage.getItem("urlId") === null) {
+      localStorage.setItem("urlId", "0");
+    } else {
+      nextId = parseInt(localStorage.getItem("urlId")) + 1;
+      localStorage.setItem("urlId", nextId.toString());
+    }
+
+    const token = JSON.parse(localStorage.getItem("user")).token;
+
     axios({
       method: "POST",
       url: anlyLongToShortUrl,
       data: {
+        id: nextId,
         longUrl: formattedUrl,
         shotUrl: "",
         encode: encodeMethod,
       },
+      headers: {
+        Authorization: token,
+      },
+      withCredentials: true,
     })
       .then((response) => {
         setResponseData(response.data);
@@ -90,8 +109,20 @@ const Shorten = () => {
     setIsLoading(false);
   };
 
-  const availableUrls = urls.map((url) => (
-    <Table key={url.id} shortUrl={url.shortUrl} longUrl={url.longUrl} />
+  const removeUrl = (shortUrl) => {
+    let urls = JSON.parse(localStorage.getItem("urlTable"));
+    urls = urls.filter((url) => url.shortUrl !== shortUrl);
+    localStorage.setItem("urlTable", JSON.stringify(urls));
+    setAvailableUrls(urls);
+  };
+
+  const availableUrlsToShow = availableUrls.map((url) => (
+    <UrlTable
+      removeUrl={removeUrl}
+      key={url.id}
+      shortUrl={url.shortUrl}
+      longUrl={url.longUrl}
+    />
   ));
 
   return (
@@ -112,7 +143,7 @@ const Shorten = () => {
           <Button type="submit">Shorten</Button>
         </div>
       </form>
-      <ul>{availableUrls}</ul>
+      <ul>{availableUrlsToShow}</ul>
     </Card>
   );
 };
